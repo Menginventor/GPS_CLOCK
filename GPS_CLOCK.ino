@@ -17,9 +17,9 @@ Adafruit_SSD1306 display(OLED_RESET);
 #define MID_BTN 1
 #define RIGHT_BTN 2
 #define PRESS_DEBONCE_TIME 50//MS
+#define TIME_ZONE_ADDR 0
 
-
-int offset = 7 * 60 * 60; //7 hour for Thailand;
+char time_zone = 7 ;//7 hour for Thailand;
 byte screen_state = 0;
 const char* day_name[] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
 byte sate_used = 0;
@@ -27,11 +27,11 @@ String speed_str = "--";
 String LAT_str = "--";
 String LONG_str = "--";
 String ALT_str = "--";
-
+byte gps_date,gps_month,gps_year;
 void setup() {
   // put your setup code here, to run once:
-  setTime(compileTime());
-  adjustTime(-60 * 60 * 7);
+  //setTime(compileTime());
+  //adjustTime(-60 * 60 * 7);
 
 
   //mySerial.attachInterrupt(&GPS_loop);
@@ -45,6 +45,7 @@ void setup() {
 
   //setTime(23, 33, 00, 10, 5, 2018);
   Serial.begin(9600);
+  EEPROM.get(TIME_ZONE_ADDR, time_zone);
 }
 
 void loop() {
@@ -78,6 +79,16 @@ void update_screen_state(byte btn) {
   else if (screen_state == 4) {
     if (btn == RIGHT_BTN)screen_state = 0;
     else  if (btn == LEFT_BTN)screen_state = 3;
+    else  if (btn == MID_BTN)screen_state = 5;
+  }
+  else if (screen_state == 5) {
+    if (btn == RIGHT_BTN)time_zone++;
+    else  if (btn == LEFT_BTN)time_zone--;
+    else  if (btn == MID_BTN) {
+      screen_state = 4;
+      EEPROM.put(TIME_ZONE_ADDR, time_zone);
+    }
+
   }
   else {
     screen_state = 0;
@@ -103,9 +114,16 @@ void oled_display() {
   else if (screen_state == 1) {
     display_speedo() ;
   }
-   else if (screen_state == 2) {
+  else if (screen_state == 2) {
     display_position() ;
   }
+  else if (screen_state == 4) {
+    display_timezone() ;
+  }
+  else if (screen_state == 5) {
+    setting_timezone() ;
+  }
+
   else {
     display.clearDisplay();
     display.setCursor(0, 0);

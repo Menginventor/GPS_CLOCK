@@ -69,12 +69,12 @@ void GPS_GGA_read(String &msg) {
     if (i > 0 && i < msg.length() - 3) {
       CRC = CRC ^ msg.charAt(i);
     }
-    Serial.print(msg.charAt(i));
+    //Serial.print(msg.charAt(i));
 
   }
 
 
-  Serial.println();
+  //Serial.println();
 
   unsigned char CRC_rx = (hex_char_to_byte (msg.charAt(msg.length() - 2)) << 4) | hex_char_to_byte (msg.charAt(msg.length() - 1));
   if (CRC != CRC_rx  ) {
@@ -89,9 +89,16 @@ void GPS_GGA_read(String &msg) {
     Serial.println("GGA unavailable");
     return;
   }
-  Serial.print("UTC\t:");
+  // Serial.print("UTC\t:");//hhmmss.ss
 
-  Serial.println(msg.substring(comma_arr[0] + 1, comma_arr[1]));
+  // Serial.println(msg.substring(comma_arr[0] + 1, comma_arr[1]));
+  String GPS_UTC = msg.substring(comma_arr[0] + 1, comma_arr[1]);
+  byte gps_hour = GPS_UTC.substring(0, 2).toInt();
+  byte gps_minute = GPS_UTC.substring(2, 4).toInt();
+  byte gps_second = GPS_UTC.substring(4, 6).toInt();
+
+  setTime(gps_hour, gps_minute, gps_second, gps_date, gps_month, int(gps_year) + 2000);
+  adjustTime(int(time_zone) * 60 * 60);
 
   if (msg.substring(comma_arr[6] + 1, comma_arr[7]).length() != 0) {
     sate_used = msg.substring(comma_arr[6] + 1, comma_arr[7]).toInt();
@@ -116,22 +123,24 @@ void GPS_GGA_read(String &msg) {
   LONG_str = msg.substring(comma_arr[3] + 1, comma_arr[4]) + " " + msg.substring(comma_arr[4] + 1, comma_arr[5]);
   LONG_str =  LONG_str.substring(0, 3) + " " +  LONG_str.substring(3, LONG_str.length());
   ALT_str = msg.substring(comma_arr[8] + 1, comma_arr[9]) + " m";
+  /*
+    Serial.println("GGA available");
 
-  Serial.println("GGA available");
-  Serial.print("LAT\t:");
-  Serial.print(msg.substring(comma_arr[1] + 1, comma_arr[2]));
-  Serial.println(msg.substring(comma_arr[2] + 1, comma_arr[3]));
-  Serial.print("LONG\t:");
-  Serial.print(msg.substring(comma_arr[3] + 1, comma_arr[4]));
-  Serial.println(msg.substring(comma_arr[4] + 1, comma_arr[5]));
+    Serial.print("LAT\t:");
+    Serial.print(msg.substring(comma_arr[1] + 1, comma_arr[2]));
+    Serial.println(msg.substring(comma_arr[2] + 1, comma_arr[3]));
+    Serial.print("LONG\t:");
+    Serial.print(msg.substring(comma_arr[3] + 1, comma_arr[4]));
+    Serial.println(msg.substring(comma_arr[4] + 1, comma_arr[5]));
 
-  Serial.print("QUAL\t:");
-  Serial.println(msg.substring(comma_arr[5] + 1, comma_arr[6]));
-  Serial.print("SAT\t:");
-  Serial.println(msg.substring(comma_arr[6] + 1, comma_arr[7]));
+    Serial.print("QUAL\t:");
+    Serial.println(msg.substring(comma_arr[5] + 1, comma_arr[6]));
+    Serial.print("SAT\t:");
+    Serial.println(msg.substring(comma_arr[6] + 1, comma_arr[7]));
 
-  Serial.print("ALT\t:");
-  Serial.println(msg.substring(comma_arr[8] + 1, comma_arr[9]));
+    Serial.print("ALT\t:");
+    Serial.println(msg.substring(comma_arr[8] + 1, comma_arr[9]));
+  */
 
 
 
@@ -175,9 +184,18 @@ void GPS_RMC_read(String &msg) {
   }
   Serial.print("SPEED\t:");
   Serial.println(msg.substring(comma_arr[6] + 1, comma_arr[7]));
+  Serial.print("DATE\t:");
+  Serial.println(msg.substring(comma_arr[8] + 1, comma_arr[9]));
   if (msg.substring(comma_arr[6] + 1, comma_arr[7]).length() != 0) {
     speed_str = String(msg.substring(comma_arr[6] + 1, comma_arr[7]).toFloat() * 1.852);
   }
+  if (msg.substring(comma_arr[8] + 1, comma_arr[9]).length() != 0) {
+    String date_str = msg.substring(comma_arr[8] + 1, comma_arr[9]);
+    gps_date = date_str.substring(0, 2).toInt();
+    gps_month = date_str.substring(2, 4).toInt();
+    gps_year = date_str.substring(4, 6).toInt();
+  }
+
 
 }
 
