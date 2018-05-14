@@ -57,8 +57,8 @@ void GPS_GGA_read(String &msg) {
   ALT_str = "--";
   for (unsigned char i = 0 ; i < msg.length() ; i++) {
     if (comma_i > 14) {
-      Serial.println("ERR");
-      Serial.println(comma_i);
+      //Serial.println("ERR");
+      //Serial.println(comma_i);
       return;
     }
     if (msg.charAt(i) == ',') {
@@ -78,15 +78,16 @@ void GPS_GGA_read(String &msg) {
 
   unsigned char CRC_rx = (hex_char_to_byte (msg.charAt(msg.length() - 2)) << 4) | hex_char_to_byte (msg.charAt(msg.length() - 1));
   if (CRC != CRC_rx  ) {
-
-    Serial.println("CRC invalid!");
-    Serial.println(CRC, HEX);
-    Serial.println((hex_char_to_byte (msg.charAt(msg.length() - 2)) << 4) | hex_char_to_byte (msg.charAt(msg.length() - 1))  , HEX);
+    /*
+        Serial.println("CRC invalid!");
+        Serial.println(CRC, HEX);
+        Serial.println((hex_char_to_byte (msg.charAt(msg.length() - 2)) << 4) | hex_char_to_byte (msg.charAt(msg.length() - 1))  , HEX);
+    */
     return;
   }
 
   if (msg.charAt(comma_arr[5] + 1) == '0') {
-    Serial.println("GGA unavailable");
+    //Serial.println("GGA unavailable");
     return;
   }
   // Serial.print("UTC\t:");//hhmmss.ss
@@ -102,8 +103,8 @@ void GPS_GGA_read(String &msg) {
 
   if (msg.substring(comma_arr[6] + 1, comma_arr[7]).length() != 0) {
     sate_used = msg.substring(comma_arr[6] + 1, comma_arr[7]).toInt();
-    Serial.print("sate_used = ");
-    Serial.println( sate_used );
+    //Serial.print("sate_used = ");
+    //Serial.println( sate_used );
   }
   //
   /*
@@ -142,7 +143,9 @@ void GPS_GGA_read(String &msg) {
     Serial.println(msg.substring(comma_arr[8] + 1, comma_arr[9]));
   */
 
-
+  if (logging) {
+    
+  }
 
 }
 
@@ -162,30 +165,31 @@ void GPS_RMC_read(String &msg) {
     if (i > 0 && i < msg.length() - 3) {
       CRC = CRC ^ msg.charAt(i);
     }
-    Serial.print(msg.charAt(i));
+    //Serial.print(msg.charAt(i));
 
   }
 
 
-  Serial.println();
+  //Serial.println();
   unsigned char CRC_rx = (hex_char_to_byte (msg.charAt(msg.length() - 2)) << 4) | hex_char_to_byte (msg.charAt(msg.length() - 1));
   if (CRC != CRC_rx  ) {
-
-    Serial.println("CRC invalid!");
-    Serial.println(CRC, HEX);
-    Serial.println((hex_char_to_byte (msg.charAt(msg.length() - 2)) << 4) | hex_char_to_byte (msg.charAt(msg.length() - 1))  , HEX);
-
+    /*
+        Serial.println("CRC invalid!");
+        Serial.println(CRC, HEX);
+        Serial.println((hex_char_to_byte (msg.charAt(msg.length() - 2)) << 4) | hex_char_to_byte (msg.charAt(msg.length() - 1))  , HEX);
+    */
     return;
   }
 
   if (msg.charAt(comma_arr[11] + 1) == 'N') {
     Serial.println("RMC unavailable");
     return;
-  }
+  }/*
   Serial.print("SPEED\t:");
   Serial.println(msg.substring(comma_arr[6] + 1, comma_arr[7]));
   Serial.print("DATE\t:");
   Serial.println(msg.substring(comma_arr[8] + 1, comma_arr[9]));
+*/
   if (msg.substring(comma_arr[6] + 1, comma_arr[7]).length() != 0) {
     speed_str = String(msg.substring(comma_arr[6] + 1, comma_arr[7]).toFloat() * 1.852);
   }
